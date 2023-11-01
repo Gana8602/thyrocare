@@ -4,6 +4,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:thyrocare/Pages/Contact.dart';
 import 'package:thyrocare/Pages/Login.dart';
 import 'package:thyrocare/Pages/Report.dart';
+import 'package:thyrocare/Pages/Test_Rate.dart';
 import 'package:thyrocare/Pages/cashback.dart';
 import 'package:thyrocare/Pages/homepage.dart';
 import 'package:thyrocare/Pages/offer.dart';
@@ -49,7 +50,7 @@ class _HomeState extends State<Home> {
             color: Color(0xFF121e19),
           ),
           Icon(
-            Icons.money_outlined,
+            Icons.wallet,
             size: 30,
             color: Color(0xFF121e19),
           ),
@@ -170,7 +171,10 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               // Add your action here when the "Home" option is selected.
               // For example, you can navigate to the home page.
-              Navigator.pop(context); // Close the drawer
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TestRate())); // Close the drawer
             },
           ),
           ListTile(

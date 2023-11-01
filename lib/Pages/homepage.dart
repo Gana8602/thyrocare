@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lecle_flutter_carousel_pro/lecle_flutter_carousel_pro.dart';
+import 'package:icons_plus/icons_plus.dart';
 
 class homePage extends StatefulWidget {
   const homePage({super.key});
@@ -9,6 +11,15 @@ class homePage extends StatefulWidget {
 }
 
 class _homePageState extends State<homePage> {
+  final List<IconData> icons = [
+    // Icons.home,
+    Icons.book_sharp,
+    Icons.wallet,
+    CupertinoIcons.rays,
+    Iconsax.whatsapp,
+    Bootstrap.toggle_off,
+    Icons.contact_phone_outlined
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,7 +79,10 @@ class _homePageState extends State<homePage> {
               childAspectRatio: 1.0, // Adjust this as needed
             ),
             itemBuilder: (BuildContext context, int index) {
-              return GridItemWidget(index: index + 0);
+              return GridItemWidget(
+                index: index + 0,
+                iconData: icons[index],
+              );
             },
           ),
           const SizedBox(
@@ -136,7 +150,8 @@ class _homePageState extends State<homePage> {
 
 class GridItemWidget extends StatelessWidget {
   final int index;
-  const GridItemWidget({required this.index});
+  final IconData iconData;
+  const GridItemWidget({required this.index, required this.iconData});
 
   @override
   Widget build(BuildContext context) {
@@ -149,6 +164,7 @@ class GridItemWidget extends StatelessWidget {
       'Call Us',
       'contact',
     ];
+
     return Center(
       child: Container(
         height: 120,
@@ -171,8 +187,8 @@ class GridItemWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.ac_unit, // Replace with your desired icon
+            Icon(
+              iconData, // Replace with your desired icon
               size: 30,
               color: Colors.blueAccent,
             ),

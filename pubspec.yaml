@@ -42,6 +42,7 @@ dependencies:
   firebase_auth: ^4.12.0
   fluttertoast: ^8.2.2
   lecle_flutter_carousel_pro: ^0.0.3
+  icons_plus: ^4.0.0
 
 dev_dependencies:
   flutter_test:

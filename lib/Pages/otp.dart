@@ -73,6 +73,7 @@ class _OtpPageState extends State<OtpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // automaticallyImplyLeading: Colors.black,
         backgroundColor: Colors.transparent,
       ),
       backgroundColor: AC.BC,
@@ -164,7 +165,7 @@ class _OtpPageState extends State<OtpPage> {
                           ),
                         ),
                       ),
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.black),
                     ),
                   ),
                 ),
