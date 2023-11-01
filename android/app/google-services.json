@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "910092138537",
+    "project_id": "thyrocare-8d7e6",
+    "storage_bucket": "thyrocare-8d7e6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:910092138537:android:2208866d3426856a294438",
+        "android_client_info": {
+          "package_name": "com.example.thyrocare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhGzIIv5BmXEgSlSZMEiZ-Ha_GIntv6-E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
