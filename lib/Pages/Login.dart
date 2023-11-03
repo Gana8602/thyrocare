@@ -5,13 +5,8 @@ import 'package:thyrocare/Pages/mainpage.dart';
 import 'package:thyrocare/Pages/otp.dart';
 import 'package:thyrocare/utils/colors.dart';
 
-class RegistrationPage extends StatefulWidget {
-  @override
-  _RegistrationPageState createState() => _RegistrationPageState();
-}
-
-class _RegistrationPageState extends State<RegistrationPage> {
-  final _nameController = TextEditingController();
+class RegistrationPage extends StatelessWidget {
+  // final _nameController = TextEditingController();
   final _phoneNumberController = TextEditingController();
 
   void _showToast(String message) {
@@ -56,9 +51,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
           context,
           MaterialPageRoute(
             builder: (context) => OtpPage(
-                name: _nameController.text,
                 phoneNumber: phoneNumber,
-                verificationId: verificationId),
+                verificationId: verificationId,
+                codeLenth: 4),
           ),
         );
       },
@@ -92,7 +87,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 const Padding(
                   padding: EdgeInsets.only(left: 15.0, bottom: 5.0, top: 20),
                   child: Text(
-                    'Register',
+                    'Log In',
                     style: TextStyle(
                       color: AC.TC,
                       fontSize: 25,
@@ -107,57 +102,57 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     style: TextStyle(color: AC.TC, fontSize: 15),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.only(left: 15.0, top: 10),
-                  child: Text(
-                    'Enter Your Name',
-                    style: TextStyle(color: AC.TC),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                              Colors.grey.withOpacity(0.5), // Light grey shadow
-                          spreadRadius: 2,
-                          blurRadius: 4,
-                          offset: const Offset(
-                              0, 4), // Changes the position of the shadow
-                        ),
-                      ],
-                      borderRadius: const BorderRadius.all(Radius.circular(15)),
-                      color: AC.BC,
-                    ),
-                    child: TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                        labelText: 'Name',
-                        fillColor: Colors.grey,
-                        labelStyle: TextStyle(color: Colors.grey),
-                        focusColor: Colors.grey,
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
-                          borderSide: BorderSide(color: Colors.transparent),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
-                          borderSide: BorderSide(
-                            color: Color.fromARGB(255, 155, 80, 75),
-                          ),
-                        ),
-                      ),
-                      style: const TextStyle(color: Colors.black),
-                    ),
-                  ),
-                ),
+                // const Padding(
+                //   padding: EdgeInsets.only(left: 15.0, top: 10),
+                //   child: Text(
+                //     'Enter Your Name',
+                //     style: TextStyle(color: AC.TC),
+                //   ),
+                // ),
+                // Padding(
+                //   padding: const EdgeInsets.all(15.0),
+                //   child: Container(
+                //     decoration: BoxDecoration(
+                //       boxShadow: [
+                //         BoxShadow(
+                //           color:
+                //               Colors.grey.withOpacity(0.5), // Light grey shadow
+                //           spreadRadius: 2,
+                //           blurRadius: 4,
+                //           offset: const Offset(
+                //               0, 4), // Changes the position of the shadow
+                //         ),
+                //       ],
+                //       borderRadius: const BorderRadius.all(Radius.circular(15)),
+                //       color: AC.BC,
+                //     ),
+                //     child: TextFormField(
+                //       controller: _nameController,
+                //       decoration: const InputDecoration(
+                //         floatingLabelBehavior: FloatingLabelBehavior.never,
+                //         labelText: 'Name',
+                //         fillColor: Colors.grey,
+                //         labelStyle: TextStyle(color: Colors.grey),
+                //         focusColor: Colors.grey,
+                //         focusedBorder: OutlineInputBorder(
+                //           borderRadius: BorderRadius.all(Radius.circular(15)),
+                //           borderSide: BorderSide(color: Colors.transparent),
+                //         ),
+                //         enabledBorder: OutlineInputBorder(
+                //           borderRadius: BorderRadius.all(Radius.circular(15)),
+                //           borderSide: BorderSide(color: Colors.transparent),
+                //         ),
+                //         errorBorder: OutlineInputBorder(
+                //           borderRadius: BorderRadius.all(Radius.circular(15)),
+                //           borderSide: BorderSide(
+                //             color: Color.fromARGB(255, 155, 80, 75),
+                //           ),
+                //         ),
+                //       ),
+                //       style: const TextStyle(color: Colors.black),
+                //     ),
+                //   ),
+                // ),
                 const Padding(
                   padding: EdgeInsets.only(left: 15.0, top: 10),
                   child: Text(
@@ -226,7 +221,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       child: const Center(
                         child: Text(
                           'Next',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ),
                     ),

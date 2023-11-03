@@ -1,19 +1,24 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thyrocare/Pages/Register.dart';
 import 'package:thyrocare/Pages/homepage.dart';
 import 'package:thyrocare/Pages/mainpage.dart';
-
+import 'dart:convert';
 import '../utils/colors.dart';
+import 'package:http/http.dart' as http;
 
 class OtpPage extends StatefulWidget {
-  final String name;
+  // final String name;
   final String phoneNumber;
   final String verificationId;
+  final int codeLenth;
   const OtpPage(
       {super.key,
-      required this.name,
+      // required this.name,
       required this.phoneNumber,
+      required this.codeLenth,
       required this.verificationId});
 
   @override
@@ -48,16 +53,33 @@ class _OtpPageState extends State<OtpPage> {
     try {
       UserCredential userCredential =
           await auth.signInWithCredential(credential);
+
       if (userCredential.user != null) {
-        // Navigate to the next screen after successful verification
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Home(
-              name: widget.name,
-            ),
-          ),
+        final url =
+            'http://ban58.thyroreport.com/api/Patient/GetPatientByPhoneNo?phoneNo=${widget.phoneNumber}';
+        final response = await http.get(
+          Uri.parse(url),
         );
+        // Navigate to the next screen after successful verification
+        if (response.statusCode == 200) {
+          // Assuming the response is a JSON array as mentioned earlier
+          List<dynamic> jsonResponse = json.decode(response.body);
+          print("Received JSON Response: $jsonResponse");
+          if (jsonResponse.isNotEmpty) {
+            // User has an account, navigate to the Home screen
+            final user = jsonResponse.first;
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            prefs.setString('userName', user['firstName']);
+            prefs.setString('userEmail', user['emailID']);
+            prefs.setString('userPhone', user['phoneNo']);
+            // Navigate based on user existence
+            navigateBasedOnUser(prefs);
+          } else {
+            navigateBasedOnUser(null);
+          }
+        } else {
+          print('Request failed with status: ${response.statusCode}');
+        }
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -67,6 +89,35 @@ class _OtpPageState extends State<OtpPage> {
       print("Failed to verify OTP: ${e.message}");
       _showToast('Failed to verify OTP: ${e.message}');
     }
+  }
+
+  void navigateBasedOnUser(SharedPreferences? prefs) {
+    if (prefs != null && prefs.containsKey('userName')) {
+      saveSession();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Home(
+            // myCurrentIndex: 0,
+            name: prefs.getString('userName') ?? '',
+          ),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RegisterPage(
+            phoneNumber: widget.phoneNumber,
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> saveSession() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isLoggedIn', true);
   }
 
   @override

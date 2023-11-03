@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thyrocare/Pages/Login.dart';
+import 'package:thyrocare/Pages/mainpage.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -9,12 +11,32 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () {
-      // Navigate to the register page after 3 seconds
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => RegistrationPage()));
+    navigateToPage();
+  }
+
+  Future<void> navigateToPage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (isLoggedIn) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => Home(
+                    name: prefs.getString('userName') ?? '',
+                    // myCurrentIndex: 0,
+                  )),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => RegistrationPage()),
+        );
+      }
     });
   }
 

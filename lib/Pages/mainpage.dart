@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:get/get.dart';
 import 'package:thyrocare/Pages/Contact.dart';
 import 'package:thyrocare/Pages/Login.dart';
 import 'package:thyrocare/Pages/Report.dart';
@@ -9,17 +10,25 @@ import 'package:thyrocare/Pages/cashback.dart';
 import 'package:thyrocare/Pages/homepage.dart';
 import 'package:thyrocare/Pages/offer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Home extends StatefulWidget {
   final String name;
-  const Home({super.key, required this.name});
+  // final int myCurrentIndex;
+  // final Function(int) onIndexChanged;
+  const Home({
+    required this.name,
+    // required int myCurrentIndex,
+    // required this.onIndexChanged
+  });
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  int myCurrentIndex = 0;
+  int _myCurrentIndex = 0;
+  final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
   List pages = const [homePage(), Report(), Cashback(), Offers(), ContactUs()];
 
   @override
@@ -34,9 +43,10 @@ class _HomeState extends State<Home> {
         backgroundColor: Colors.blueAccent,
       ),
       drawer: MyDrawer(text: widget.name),
-      body: pages[myCurrentIndex],
+      body: pages[_myCurrentIndex],
       bottomNavigationBar: CurvedNavigationBar(
-        index: 0,
+        key: _bottomNavigationKey,
+        index: _myCurrentIndex,
         height: 60.0,
         items: const <Widget>[
           Icon(
@@ -72,7 +82,7 @@ class _HomeState extends State<Home> {
         animationDuration: const Duration(milliseconds: 300),
         onTap: (index) {
           setState(() {
-            myCurrentIndex = index;
+            _myCurrentIndex = index;
           });
         },
         letIndexChange: (index) => true,
@@ -144,7 +154,13 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               // Add your action here when the "Home" option is selected.
               // For example, you can navigate to the home page.
-              Navigator.pop(context); // Close the drawer
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Home(
+                            name: widget.text,
+                            // myCurrentIndex: 0
+                          ))); // Close the drawer
             },
           ),
           ListTile(
@@ -162,7 +178,13 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               // Add your action here when the "Home" option is selected.
               // For example, you can navigate to the home page.
-              Navigator.pop(context); // Close the drawer
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Home(
+                            name: widget.text,
+                            // myCurrentIndex: 2
+                          ))); // Close the drawer
             },
           ),
           ListTile(
