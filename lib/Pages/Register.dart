@@ -52,16 +52,26 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (response.statusCode == 201) {
         // Handle the success response
-        saveSession();
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => Home(
-                      name: _firstNameController.text,
-                      //  myCurrentIndex: 0
-                    )));
-        print("Patient created successfully");
+
         print(response.body);
+        final jsonResponse = json.decode(response.body);
+        final patientID = jsonResponse['patientID'];
+        await savePatientIDLocally(patientID);
+
+        saveSession();
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainPAge(
+              name: _firstNameController.text,
+              onNavigation: (value) => 0,
+            ),
+          ),
+        );
+        print("Patient created successfully");
+      } else if (response.statusCode == 500) {
+        print('json response : ${response.body}');
       } else {
         // Handle error response
         print("Failed to create patient. Status code: ${response.statusCode}");
@@ -75,6 +85,11 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> saveSession() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('isLoggedIn', true);
+  }
+
+  Future<void> savePatientIDLocally(int patientID) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('patientID', patientID);
   }
 
   @override

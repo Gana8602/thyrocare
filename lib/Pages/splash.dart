@@ -26,8 +26,9 @@ class _SplashScreenState extends State<SplashScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => Home(
+              builder: (context) => MainPAge(
                     name: prefs.getString('userName') ?? '',
+                    onNavigation: (value) => 0,
                     // myCurrentIndex: 0,
                   )),
         );

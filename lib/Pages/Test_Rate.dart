@@ -1,31 +1,47 @@
 import 'package:flutter/material.dart';
-
-import '../utils/colors.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class TestRate extends StatefulWidget {
-  const TestRate({super.key});
+  const TestRate({Key? key}) : super(key: key);
 
   @override
   State<TestRate> createState() => _TestRateState();
 }
 
 class _TestRateState extends State<TestRate> {
-  List<String> testName = [
-    'AAROGYAM C PRO',
-    'HB',
-    'HBA1C',
-    'KIDNEY PROFILE',
-    'DIABETIC PROFILE',
-    'LIVER PROFILE',
-  ];
-  List<String> price = [
-    '2599',
-    '400',
-    '325',
-    '899',
-    '100',
-    '600',
-  ];
+  List<Map<String, dynamic>> testData = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAndSetTestData();
+  }
+
+  Future<List<Map<String, dynamic>>> fetchTestData() async {
+    final response = await http.get(
+        Uri.parse('http://ban58.thyroreport.com/api/LabTest/GetActiveTest'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return List<Map<String, dynamic>>.from(data);
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
+  Future<void> fetchAndSetTestData() async {
+    try {
+      List<Map<String, dynamic>> data = await fetchTestData();
+      setState(() {
+        testData = data;
+      });
+    } catch (e) {
+      print('Error: $e');
+      // Handle error or show a message to the user
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,53 +54,41 @@ class _TestRateState extends State<TestRate> {
         backgroundColor: Colors.blueAccent,
       ),
       body: ListView(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              'Test details',
-              style: TextStyle(
-                  color: AC.TC, fontWeight: FontWeight.bold, fontSize: 20),
+        children: testData.map((item) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              height: 60,
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 25.0),
+                    child: Text(item['testName']),
+                  ),
+                  Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(item['cost'].toString()),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Column(
-            children: [
-              for (int i = 0; i < 6; i++)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                      height: 60,
-                      decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 4,
-                              offset: const Offset(0, 4),
-                            )
-                          ],
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(Radius.circular(10))),
-                      width: MediaQuery.of(context).size.width,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 25.0),
-                            child: Text(testName[i]),
-                          ),
-                          Spacer(),
-                          Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Text(price[i]),
-                          )
-                        ],
-                      )),
-                )
-            ],
-          )
-        ],
+          );
+        }).toList(),
       ),
     );
   }

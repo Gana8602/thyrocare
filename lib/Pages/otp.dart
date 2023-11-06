@@ -69,6 +69,7 @@ class _OtpPageState extends State<OtpPage> {
             // User has an account, navigate to the Home screen
             final user = jsonResponse.first;
             SharedPreferences prefs = await SharedPreferences.getInstance();
+            prefs.setString('patientID', user['patientID'].toString());
             prefs.setString('userName', user['firstName']);
             prefs.setString('userEmail', user['emailID']);
             prefs.setString('userPhone', user['phoneNo']);
@@ -94,15 +95,8 @@ class _OtpPageState extends State<OtpPage> {
   void navigateBasedOnUser(SharedPreferences? prefs) {
     if (prefs != null && prefs.containsKey('userName')) {
       saveSession();
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Home(
-            // myCurrentIndex: 0,
-            name: prefs.getString('userName') ?? '',
-          ),
-        ),
-      );
+       final homeState = MainPAge.of(context);
+        homeState?.onNavigation(0);
     } else {
       Navigator.push(
         context,

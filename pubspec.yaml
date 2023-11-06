@@ -47,6 +47,10 @@ dependencies:
   http: ^1.1.0
   url_launcher: ^6.2.1
   carousel_slider: ^4.2.1
+  intl: ^0.18.1
+  path_provider: ^2.1.1
+  permission_handler: ^11.0.1
+  flutter_local_notifications: ^16.1.0
 
 dev_dependencies:
   flutter_test:
@@ -78,6 +82,7 @@ flutter:
      - assets/ban2.jpg
      - assets/ban3.png
      - assets/banner.png
+     - assets/wave.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

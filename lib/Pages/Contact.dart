@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class ContactUs extends StatefulWidget {
   const ContactUs({super.key});
@@ -17,45 +18,23 @@ class _ContactUsState extends State<ContactUs> {
 
   Future<void> call() async {
     Future.delayed(const Duration(seconds: 1), () {
-      String tel = '+911234567890';
-      void _makePhoneCall(String tel) async {
-        if (await canLaunch('tel:$tel')) {
-          await launch('tel:$tel');
-        } else {
-          throw 'Could not launch $tel';
-        }
-      }
+      _makePhoneCall('+918248596881');
     });
+  }
+
+  void _makePhoneCall(String phoneNumber) async {
+    if (await launchUrlString('tel:$phoneNumber')) {
+      await launch('tel:$phoneNumber');
+    } else {
+      throw 'Could not launch $phoneNumber';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        height: 200,
-        width: MediaQuery.of(context).size.width,
-        child: Center(
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              Row(
-                children: [
-                  for (int i = 0; i < 6; i++)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10, right: 10),
-                      child: Container(
-                        height: 150,
-                        width: 350,
-                        color: Colors.red,
-                        child: Center(child: Text('hafb')),
-                      ),
-                    )
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
-    );
+        body: Center(
+      child: Text('Hello, Please Wait... You Will be redirect to Contact Us'),
+    ));
   }
 }
