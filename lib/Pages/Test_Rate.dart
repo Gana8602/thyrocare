@@ -46,11 +46,11 @@ class _TestRateState extends State<TestRate> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Test Details',
           style: TextStyle(color: Colors.white),
         ),
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.blueAccent,
       ),
       body: ListView(
@@ -69,7 +69,7 @@ class _TestRateState extends State<TestRate> {
                   ),
                 ],
                 color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(10)),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -79,7 +79,7 @@ class _TestRateState extends State<TestRate> {
                     padding: const EdgeInsets.only(left: 25.0),
                     child: Text(item['testName']),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Text(item['cost'].toString()),

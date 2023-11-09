@@ -51,6 +51,9 @@ dependencies:
   path_provider: ^2.1.1
   permission_handler: ^11.0.1
   flutter_local_notifications: ^16.1.0
+  flutter_downloader: ^1.10.4
+  flutter_file_downloader: ^1.1.4
+  android_intent: ^2.0.2
 
 dev_dependencies:
   flutter_test:

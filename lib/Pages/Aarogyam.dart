@@ -2,15 +2,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thyrocare/utils/colors.dart';
 
-class MonthlyOffer extends StatefulWidget {
-  const MonthlyOffer({super.key});
+class AarogyamPackage extends StatefulWidget {
+  const AarogyamPackage({super.key});
 
   @override
-  State<MonthlyOffer> createState() => _MonthlyOfferState();
+  State<AarogyamPackage> createState() => _AarogyamPackageState();
 }
 
-class _MonthlyOfferState extends State<MonthlyOffer> {
+class _AarogyamPackageState extends State<AarogyamPackage> {
   List<dynamic> Imagess = []; // Initialize Imagess as an empty list
 
   @override
@@ -23,7 +24,8 @@ class _MonthlyOfferState extends State<MonthlyOffer> {
       'http://ban58files.thyroreport.com/UploadedFiles/OfferPackage';
 
   Future<void> GetImages() async {
-    final url = 'http://ban58.thyroreport.com/api/Package/GetAllPackage';
+    final url =
+        'http://ban58.thyroreport.com/api/AarogyamPackage/GetAarogyamPackage';
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -43,7 +45,7 @@ class _MonthlyOfferState extends State<MonthlyOffer> {
 
   List<String> getImageUrls() {
     return Imagess.map<String>((dynamic image) {
-      String imageName = image['packageFileName'];
+      String imageName = image['aarogyamPackageFileName'];
       String imageUrl = '$imgPath/$imageName'; // Change this line
       return imageUrl;
     }).toList();
@@ -55,19 +57,20 @@ class _MonthlyOfferState extends State<MonthlyOffer> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Monthly Offers',
+          'Aarogyam Package',
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: AC.TC,
       ),
       body: SingleChildScrollView(
         child: imageUrls.isEmpty
             ? const Center(
                 child: Padding(
-                padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
-              ))
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
             : Column(
                 children: [
                   for (int i = 0; i < imageUrls.length; i++)

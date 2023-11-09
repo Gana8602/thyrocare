@@ -23,7 +23,7 @@ class _OffersState extends State<Offers> {
   final String imgPath =
       'http://ban58files.thyroreport.com/UploadedFiles/OfferPackage/';
   Future<void> GetIamges() async {
-    final url = 'http://ban58.thyroreport.com/api/Package/GetAllPackage';
+    final url = 'http://ban58.thyroreport.com/api/Offer/GetAllOffer';
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -43,11 +43,28 @@ class _OffersState extends State<Offers> {
 
   List<String> getImageUrls() {
     return Imagess.map<String>((dynamic image) {
-      String imageName = image[
-          'packageFileName']; // Use the key you receive in the API response
+      String imageName =
+          image['offerFileName']; // Use the key you receive in the API response
       String imageUrl = imgPath + imageName;
       return imageUrl;
     }).toList();
+  }
+
+  Future<void> ShowDialogBox(String image) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.transparent,
+          content: Container(
+              height: 300,
+              width: 400,
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: NetworkImage(image), fit: BoxFit.cover))),
+        );
+      },
+    );
   }
 
   List<dynamic> Imagess = [];
@@ -57,35 +74,53 @@ class _OffersState extends State<Offers> {
     return Scaffold(
         body: ListView(
       children: [
-        Padding(
+        const Padding(
           padding: EdgeInsets.all(8.0),
           child: Text(
             'My Offers',
             style: TextStyle(
-                color: AC.TC, fontWeight: FontWeight.bold, fontSize: 20),
+                color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
-        Column(
-          children: [
-            for (int i = 0; i < imageUrls.length; i++)
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: 10.0,
-                ),
-                child: Container(
-                  height: 180,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                      image: DecorationImage(
-                          image: NetworkImage(imageUrls[i]),
-                          fit: BoxFit.cover)),
-                ),
+        imageUrls.isNotEmpty
+            ? Column(
+                children: [
+                  for (int i = 0; i < imageUrls.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 10.0,
+                      ),
+                      child: GestureDetector(
+                        onTap: () {
+                          ShowDialogBox(imageUrls[i]);
+                        },
+                        child: Container(
+                          height: 180,
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.3),
+                                  spreadRadius: 2,
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                              borderRadius: BorderRadius.circular(15.0),
+                              image: DecorationImage(
+                                  image: NetworkImage(imageUrls[i]),
+                                  fit: BoxFit.cover)),
+                        ),
+                      ),
+                    )
+                ],
               )
-          ],
-        )
+            : const Center(
+                child: CircularProgressIndicator(),
+              )
       ],
     ));
   }

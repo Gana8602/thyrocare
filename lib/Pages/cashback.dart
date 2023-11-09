@@ -14,7 +14,8 @@ class Cashback extends StatefulWidget {
 
 class _CashbackState extends State<Cashback> {
   String? patientID;
-  List<Map<String, dynamic>> cashbackData = [];
+  List<Map<String, dynamic>> cashbackData1 = [];
+  List<Map<String, dynamic>> cashbackData2 = [];
 
   @override
   void initState() {
@@ -22,6 +23,7 @@ class _CashbackState extends State<Cashback> {
     GetLocalTest().then((_) {
       if (patientID != null) {
         retrieveCashbackData();
+        retrieveCashbackData2();
       } else {
         print('PatientID is null');
       }
@@ -31,7 +33,6 @@ class _CashbackState extends State<Cashback> {
   Future<void> GetLocalTest() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      // Retrieve data from SharedPreferences
       patientID = prefs.getString('patientID');
       print('patientid = $patientID');
     });
@@ -43,6 +44,7 @@ class _CashbackState extends State<Cashback> {
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
+      print('resoponse.report: ${response.body}');
       return List<Map<String, dynamic>>.from(data);
     } else {
       print('Request failed with status: ${response.statusCode}');
@@ -56,7 +58,50 @@ class _CashbackState extends State<Cashback> {
       List<Map<String, dynamic>>? data = await fetchData();
       if (data != null) {
         setState(() {
-          cashbackData = data;
+          cashbackData1 = data;
+          cashbackData1.sort((a, b) {
+            DateTime? dateA = DateTime.tryParse(a['createdDate'] ?? '');
+            DateTime? dateB = DateTime.tryParse(b['createdDate'] ?? '');
+            if (dateA != null && dateB != null) {
+              return dateB.compareTo(dateA);
+            }
+            return 0;
+          });
+        });
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>?> fetchData2() async {
+    final response = await http.get(Uri.parse(
+        'http://ban58.thyroreport.com/api/Medcoin/GetmedcoinByPatientID?PatientID=$patientID'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data2 = json.decode(response.body);
+      print("response.medcoin : ${response.body}");
+      return List<Map<String, dynamic>>.from(data2);
+    } else {
+      print('Request failed with status: ${response.statusCode}');
+      throw Exception('Failed to load cashback data');
+    }
+  }
+
+  Future<void> retrieveCashbackData2() async {
+    try {
+      List<Map<String, dynamic>>? data2 = await fetchData2();
+      if (data2 != null) {
+        setState(() {
+          cashbackData2 = data2;
+          cashbackData2.sort((a, b) {
+            DateTime? dateA = DateTime.tryParse(a['createdDate'] ?? '');
+            DateTime? dateB = DateTime.tryParse(b['createdDate'] ?? '');
+            if (dateA != null && dateB != null) {
+              return dateB.compareTo(dateA);
+            }
+            return 0;
+          });
         });
       }
     } catch (e) {
@@ -67,47 +112,116 @@ class _CashbackState extends State<Cashback> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
+      body: Column(
         children: [
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              'My Cashback',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ),
-          (cashbackData.isNotEmpty)
-              ? Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: SingleChildScrollView(
-                    child: DataTable(
-                      columns: const <DataColumn>[
-                        DataColumn(label: Text('Date')),
-                        DataColumn(label: Text('Status')),
-                        DataColumn(label: Text('Amount')),
-                      ],
-                      rows: cashbackData.map((item) {
-                        DateTime? date =
-                            DateTime.tryParse(item['createdDate'] ?? '');
-                        String formattedDate =
-                            date != null ? DateFormat.yMd().format(date) : '';
-                        return DataRow(cells: [
-                          DataCell(Text(formattedDate)),
-                          DataCell(Text(item['isExpired'] ?? '')),
-                          DataCell(Text(item['cashbackAmt']?.toString() ?? '')),
-                        ]);
-                      }).toList(),
+          Expanded(
+            child: ListView(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Lab test cashback',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
                     ),
                   ),
-                )
-              : Text('no cashback found')
+                ),
+                Container(
+                    height: 200, // Adjust the height as needed
+                    width: MediaQuery.of(context).size.width,
+                    child: cashbackData1.isNotEmpty
+                        ? Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: SingleChildScrollView(
+                              child: DataTable(
+                                columns: const <DataColumn>[
+                                  DataColumn(label: Text('Date')),
+                                  DataColumn(label: Text('Status')),
+                                  DataColumn(label: Text('Amount')),
+                                ],
+                                rows: cashbackData1.map((item) {
+                                  DateTime? date = DateTime.tryParse(
+                                      item['createdDate'] ?? '');
+                                  String formattedDate = date != null
+                                      ? DateFormat.yMd().format(date)
+                                      : '';
+                                  return DataRow(cells: [
+                                    DataCell(Text(formattedDate)),
+                                    DataCell(Text(item['isExpired'] ?? '')),
+                                    DataCell(Text(
+                                        item['cashbackAmt']?.toString() ?? '')),
+                                  ]);
+                                }).toList(),
+                              ),
+                            ),
+                          )
+                        : const Center(
+                            child: CircularProgressIndicator(),
+                          )),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    'Medicine Cashback',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+                Container(
+                    height: 200, // Adjust the height as needed
+                    width: 400,
+                    child: cashbackData2.isNotEmpty
+                        ? Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: SingleChildScrollView(
+                              child: DataTable(
+                                columns: const <DataColumn>[
+                                  DataColumn(label: Text('Date')),
+                                  DataColumn(label: Text('Status')),
+                                  DataColumn(label: Text('Amount')),
+                                  DataColumn(label: Text('Medcoin')),
+                                ],
+                                rows: cashbackData2.map((item) {
+                                  DateTime? date2 = DateTime.tryParse(
+                                      item['createdDate'] ?? '');
+                                  String formattedDate2 = date2 != null
+                                      ? DateFormat.yMd().format(date2)
+                                      : '';
+                                  return DataRow(cells: [
+                                    DataCell(Text(formattedDate2)),
+                                    DataCell(Text(item['action'] ?? '')),
+                                    DataCell(Text(
+                                        item['transactionAmt']?.toString() ??
+                                            '')),
+                                    DataCell(Text(
+                                        item['medcoin']?.toString() ?? '')),
+                                  ]);
+                                }).toList(),
+                              ),
+                            ),
+                          )
+                        : const Center(
+                            child: CircularProgressIndicator(),
+                          )),
+              ],
+            ),
+          ),
         ],
       ),
     );

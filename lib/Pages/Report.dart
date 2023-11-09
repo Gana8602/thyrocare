@@ -7,42 +7,75 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thyrocare/utils/colors.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-import '../main.dart';
+import 'package:thyrocare/main.dart';
+import 'package:thyrocare/utils/colors.dart';
+import 'package:flutter_file_downloader/flutter_file_downloader.dart';
+import 'package:android_intent/android_intent.dart';
 
 class Report extends StatefulWidget {
-  const Report({super.key});
+  const Report({Key? key});
 
   @override
   State<Report> createState() => _ReportState();
 }
 
 class _ReportState extends State<Report> {
-  String? patientID;
+  List<Map<String, dynamic>> userInformation = [];
+  bool _dataLoaded = false;
+
   @override
   void initState() {
     super.initState();
-    GetLocalID().then((_) {
+    if (!_dataLoaded) {
+      getReports();
+    }
+  }
+
+  Future<void> getReports() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? patientID = prefs.getString('patientID');
       if (patientID != null) {
-        getReport();
+        final reports = await fetchReports(patientID);
+        setState(() {
+          userInformation = List<Map<String, dynamic>>.from(reports);
+        });
       } else {
         print('PatientID is null');
       }
-    });
+    } catch (e) {
+      print('Error fetching reports: $e');
+    }
   }
 
-  Future<void> GetLocalID() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      // Retrieve data from SharedPreferences
-      patientID = prefs.getString('patientID');
-      print('patientid = $patientID');
-    });
+  Future<List<Map<String, dynamic>>> fetchReports(String patientID) async {
+    final url =
+        'http://ban58.thyroreport.com/api/Report/GetReportsByPatientID?PatientID=$patientID';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonResponse = json.decode(response.body);
+      setState(() {
+        userInformation = List<Map<String, dynamic>>.from(jsonResponse);
+        _dataLoaded = true; // Move this line here
+      });
+      return List<Map<String, dynamic>>.from(jsonResponse);
+    } else {
+      print('Request failed with status: ${response.statusCode}');
+      throw Exception('Failed to load reports data');
+    }
   }
 
-  List<dynamic> userInformation = [];
+  String convertGender(String gender) {
+    if (gender == 'Male      ') {
+      return 'M';
+    } else if (gender == 'Female    ') {
+      return 'F';
+    }
+    return 'Other'; // You can return an empty string or other handling for different cases
+  }
+
   Future<void> downloadFile(String fileName) async {
     var url =
         'http://ban58files.thyroreport.com/UploadedFiles/Reports/$fileName';
@@ -56,11 +89,11 @@ class _ReportState extends State<Report> {
       if (status.isGranted) {
         var response = await http.get(Uri.parse(url));
         if (response.statusCode == 200) {
-          var appDocDir = await getApplicationDocumentsDirectory();
-          var file = File('${appDocDir.path}/$fileName');
-          await file.writeAsBytes(response.bodyBytes);
-          print('File downloaded successfully : $fileName as ${file.path}');
-          await showNotification(fileName, file.path);
+          var appDocDir = await getExternalStorageDirectory();
+          var pdfFile = File('${appDocDir!.path}/$fileName');
+          await pdfFile.writeAsBytes(response.bodyBytes);
+          print('File downloaded successfully: $fileName as ${pdfFile.path}');
+          await showNotification(fileName, pdfFile.path);
         } else {
           throw Exception('Failed to download file: ${response.statusCode}');
         }
@@ -70,38 +103,6 @@ class _ReportState extends State<Report> {
     } catch (e) {
       print('Download error: $e');
       throw Exception('Failed to download file');
-    }
-  }
-
-  Future<void> getReport() async {
-    if (patientID == null || patientID!.isEmpty) {
-      print('PatientID is empty or null');
-      return;
-    }
-
-    final url =
-        'http://ban58.thyroreport.com/api/Report/GetReportsByPatientID?PatientID=$patientID';
-
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        List<dynamic> jsonResponse = json.decode(response.body);
-        print("Received JSON Response: $jsonResponse");
-        if (jsonResponse.isNotEmpty) {
-          setState(() {
-            userInformation = List<Map<String, dynamic>>.from(jsonResponse);
-          });
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setString('userData', json.encode(jsonResponse));
-        }
-      } else {
-        print('Request failed with status: ${response.statusCode}');
-        print('Response: ${response.body}');
-        throw Exception('Failed to load reports data');
-      }
-    } catch (e) {
-      print('Error fetching reports: $e');
-      throw Exception('Failed to load reports data');
     }
   }
 
@@ -119,76 +120,19 @@ class _ReportState extends State<Report> {
 
     await flutterLocalNotificationsPlugin.show(
       0,
-      'File: Path: $storedPath $fileName\nStored ',
-      'File Downloaded',
+      'File downloaded',
+      '$fileName downloaded successfully',
       platformChannelSpecifics,
     );
+
+    // Intent to open the PDF file
+    AndroidIntent intent = AndroidIntent(
+      action: 'action_view',
+      type: 'application/pdf',
+      data: storedPath,
+    );
+    await intent.launch();
   }
-
-  // List<Map<String, String>> userInformation = [];
-  List<String> name = [
-    'vijay Srivatsava',
-    'vijay Srivatsava',
-    'vijay Srivatsava',
-    'vijay Srivatsava',
-    'vijay Srivatsava',
-    'vijay Srivatsava'
-  ];
-  List<String> gender = [
-    'M',
-    'M',
-    'M',
-    'M',
-    'M',
-    'M',
-  ];
-  List<String> age = [
-    '40 yrs',
-    '40 yrs',
-    '40 yrs',
-    '40 yrs',
-    '40 yrs',
-    '40 yrs',
-  ];
-  List<String> date = [
-    '25-11-2023',
-    '20-03-2023',
-    '19-06-2023',
-    '18-07-2023',
-    '17-08-2023',
-    '16-09-2023',
-  ];
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   // Call a function to fetch user data on initialization
-  //   GetReport(context);
-  // }
-
-  // Future<void> GetReport(BuildContext context) async {
-  //   final url =
-  //       'http://ban58.thyroreport.com/api/Report/GetReportsByPatientID?PatientID=1';
-  //   final response = await http.get(
-  //     Uri.parse(url),
-  //   );
-  //   // Navigate to the next screen after successful verification
-  //   if (response.statusCode == 200) {
-  //     // Assuming the response is a JSON array as mentioned earlier
-  //     List<dynamic> jsonResponse = json.decode(response.body);
-  //     print("Received JSON Response: $jsonResponse");
-  //     if (jsonResponse.isNotEmpty) {
-  //       // User has an account, navigate to the Home screen
-  //       setState(() {
-  //         userInformation = jsonResponse;
-  //       });
-  //       SharedPreferences prefs = await SharedPreferences.getInstance();
-  //       prefs.setString('userData', json.encode(jsonResponse));
-  //       // Navigate based on user existence
-  //     }
-  //   } else {
-  //     print('Request failed with status: ${response.statusCode}');
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -201,21 +145,16 @@ class _ReportState extends State<Report> {
             child: Text(
               'My Reports',
               style: TextStyle(
-                  color: AC.TC, fontWeight: FontWeight.bold, fontSize: 20),
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
             ),
           ),
           userInformation.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: Text(
-                      'No data found',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+              ? const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Center(child: CircularProgressIndicator()),
                 )
               : Container(
                   child: ListView.builder(
@@ -223,38 +162,41 @@ class _ReportState extends State<Report> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: userInformation.length,
                     itemBuilder: (BuildContext context, int index) {
-                      String firstName = userInformation[index]['firstName'] ??
+                      final firstName = userInformation[index]['firstName'] ??
                           'Name Not Available';
-                      String lastName = userInformation[index]['lastName'] ??
+                      final lastName = userInformation[index]['lastName'] ??
                           'Name Not Available';
-                      String genderName =
+                      final gender =
                           userInformation[index]['sex'] ?? 'Name Not Available';
-                      String ageName =
+                      final ageName =
                           userInformation[index]['age'].toString() ??
                               'Name Not Available';
-                      String collectedDateString =
+                      final collectedDateString =
                           userInformation[index]['collectedOn'];
-                      String datePortion = collectedDateString
+                      final datePortion = collectedDateString
                           .split('T')[0]; // Extracting only the date portion
+                      final TestName = userInformation[index]['testName'] ?? '';
 
-                      String formattedDate = datePortion;
+                      final formattedDate = datePortion;
+                      print("Gender Value: $gender");
+                      final genderName = convertGender(gender);
+                      print("Gender Name: $genderName");
 
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Container(
                           height: 70,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
+                          decoration: const BoxDecoration(
+                            gradient: AC.grBG,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
+                                color: Colors.grey,
                                 spreadRadius: 2,
                                 blurRadius: 4,
-                                offset: const Offset(0, 4),
+                                offset: Offset(0, 4),
                               ),
                             ],
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10)),
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
                           width: MediaQuery.of(context).size.width,
                           child: Row(
@@ -267,34 +209,55 @@ class _ReportState extends State<Report> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
                                       children: [
                                         Text(
-                                          '$firstName $lastName',
+                                          '$firstName ',
                                           style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 17),
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 17,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Text(
+                                          TestName,
+                                          style: const TextStyle(
+                                            color: Colors.lightBlueAccent,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ],
                                     ),
                                     const SizedBox(height: 4),
                                     Row(
                                       children: [
-                                        Text(genderName,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            )),
+                                        Text(
+                                          formattedDate,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                         const SizedBox(width: 10),
-                                        Text(ageName,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            )),
+                                        Text(
+                                          '($genderName /',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                         const SizedBox(width: 10),
-                                        Text(formattedDate,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            )),
+                                        Text(
+                                          '$ageName)',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ],
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),
@@ -304,7 +267,10 @@ class _ReportState extends State<Report> {
                                       userInformation[index]['pdfReportName']);
                                   // Add functionality here
                                 },
-                                icon: const Icon(Icons.download_rounded),
+                                icon: const Icon(
+                                  Icons.download_rounded,
+                                  color: Colors.white,
+                                ),
                               ),
                             ],
                           ),

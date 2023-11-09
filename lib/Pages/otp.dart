@@ -4,7 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thyrocare/Pages/Register.dart';
 import 'package:thyrocare/Pages/homepage.dart';
-import 'package:thyrocare/Pages/mainpage.dart';
+import 'package:thyrocare/main_navigation/mainpage.dart';
 import 'dart:convert';
 import '../utils/colors.dart';
 import 'package:http/http.dart' as http;
@@ -14,12 +14,13 @@ class OtpPage extends StatefulWidget {
   final String phoneNumber;
   final String verificationId;
   final int codeLenth;
-  const OtpPage(
-      {super.key,
-      // required this.name,
-      required this.phoneNumber,
-      required this.codeLenth,
-      required this.verificationId});
+  const OtpPage({
+    super.key,
+    // required this.name,
+    required this.phoneNumber,
+    required this.codeLenth,
+    required this.verificationId,
+  });
 
   @override
   State<OtpPage> createState() => _OtpPageState();
@@ -28,6 +29,7 @@ class OtpPage extends StatefulWidget {
 class _OtpPageState extends State<OtpPage> {
   final _otpController = TextEditingController();
   bool _isOtpWrong = false;
+  bool _isLoading = false;
   // final _smsCodeController = TextEditingController();
 
   void _showToast(String message) {
@@ -43,6 +45,9 @@ class _OtpPageState extends State<OtpPage> {
   }
 
   Future<void> verifyOTP(BuildContext context) async {
+    setState(() {
+      _isLoading = true;
+    });
     FirebaseAuth auth = FirebaseAuth.instance;
 
     PhoneAuthCredential credential = PhoneAuthProvider.credential(
@@ -95,8 +100,15 @@ class _OtpPageState extends State<OtpPage> {
   void navigateBasedOnUser(SharedPreferences? prefs) {
     if (prefs != null && prefs.containsKey('userName')) {
       saveSession();
-       final homeState = MainPAge.of(context);
-        homeState?.onNavigation(0);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainPAge(
+            name: prefs.getString('userName') ?? '',
+            onNavigation: (value) => 0,
+          ),
+        ),
+      );
     } else {
       Navigator.push(
         context,
@@ -214,29 +226,47 @@ class _OtpPageState extends State<OtpPage> {
                     ),
                   ),
                 ),
-                Padding(
-                  padding:
-                      const EdgeInsets.only(left: 15.0, right: 15, top: 20),
-                  child: GestureDetector(
-                    onTap: () {
-                      verifyOTP(context);
-                    },
-                    child: Container(
-                      height: 50,
-                      width: MediaQuery.of(context).size.width,
-                      decoration: const BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.all(Radius.circular(15)),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Get Started',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.white),
+                Stack(
+                  children: [
+                    Visibility(
+                      visible: !_isLoading,
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            verifyOTP(context);
+                          },
+                          child: Container(
+                            height: 50,
+                            width: MediaQuery.of(context).size.width,
+                            decoration: const BoxDecoration(
+                              color: Colors.redAccent,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(15)),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'Get Started',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    Visibility(
+                      visible: _isLoading,
+                      child: Container(
+                        height: 50,
+                        width: MediaQuery.of(context).size.width,
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

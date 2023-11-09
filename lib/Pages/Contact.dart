@@ -32,7 +32,7 @@ class _ContactUsState extends State<ContactUs> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
         body: Center(
       child: Text('Hello, Please Wait... You Will be redirect to Contact Us'),
     ));

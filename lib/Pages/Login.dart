@@ -1,13 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:thyrocare/Pages/mainpage.dart';
+import 'package:thyrocare/main_navigation/mainpage.dart';
 import 'package:thyrocare/Pages/otp.dart';
 import 'package:thyrocare/utils/colors.dart';
 
-class RegistrationPage extends StatelessWidget {
+class RegistrationPage extends StatefulWidget {
+  RegistrationPage({super.key});
+
+  @override
+  State<RegistrationPage> createState() => _RegistrationPageState();
+}
+
+class _RegistrationPageState extends State<RegistrationPage> {
   // final _nameController = TextEditingController();
   final _phoneNumberController = TextEditingController();
+
+  bool _isLoading = false;
 
   void _showToast(String message) {
     Fluttertoast.showToast(
@@ -22,6 +31,9 @@ class RegistrationPage extends StatelessWidget {
   }
 
   Future<void> verifyPhoneNumber(BuildContext context) async {
+    setState(() {
+      _isLoading = true;
+    });
     FirebaseAuth auth = FirebaseAuth.instance;
 
     String phoneNumber = _phoneNumberController.text.trim();
@@ -204,29 +216,47 @@ class RegistrationPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                Padding(
-                  padding:
-                      const EdgeInsets.only(left: 15.0, right: 15, top: 20),
-                  child: GestureDetector(
-                    onTap: () {
-                      verifyPhoneNumber(context);
-                    },
-                    child: Container(
-                      height: 50,
-                      width: MediaQuery.of(context).size.width,
-                      decoration: const BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.all(Radius.circular(15)),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Next',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.white),
+                Stack(
+                  children: [
+                    Visibility(
+                      visible: !_isLoading,
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            verifyPhoneNumber(context);
+                          },
+                          child: Container(
+                            height: 50,
+                            width: MediaQuery.of(context).size.width,
+                            decoration: const BoxDecoration(
+                              color: Colors.redAccent,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(15)),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'Next',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    Visibility(
+                      visible: _isLoading,
+                      child: Container(
+                        height: 50,
+                        width: MediaQuery.of(context).size.width,
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
