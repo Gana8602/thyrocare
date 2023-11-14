@@ -1,32 +1,32 @@
 import 'dart:convert';
-
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import '../utils/colors.dart';
-
+import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thyrocare/utils/colors.dart';
 
-class Offers extends StatefulWidget {
-  const Offers({super.key});
+class AarogyamPackage extends StatefulWidget {
+  const AarogyamPackage({super.key});
 
   @override
-  State<Offers> createState() => _OffersState();
+  State<AarogyamPackage> createState() => _AarogyamPackageState();
 }
 
-class _OffersState extends State<Offers> {
+class _AarogyamPackageState extends State<AarogyamPackage> {
+  List<dynamic> Imagess = []; // Initialize Imagess as an empty list
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    GetIamges();
+    GetImages();
   }
 
   final String imgPath =
-      'http://ban58files.thyroreport.com/UploadedFiles/OfferPackage/';
-  Future<void> GetIamges() async {
-    final url = 'http://ban58.thyroreport.com/api/Offer/GetAllOffer';
+      'http://ban58files.thyroreport.com/UploadedFiles/OfferPackage';
+
+  Future<void> GetImages() async {
+    final url =
+        'http://ban58.thyroreport.com/api/AarogyamPackage/GetAarogyamPackage';
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -46,9 +46,8 @@ class _OffersState extends State<Offers> {
 
   List<String> getImageUrls() {
     return Imagess.map<String>((dynamic image) {
-      String imageName =
-          image['offerFileName']; // Use the key you receive in the API response
-      String imageUrl = imgPath + imageName;
+      String imageName = image['aarogyamPackageFileName'];
+      String imageUrl = '$imgPath/$imageName'; // Change this line
       return imageUrl;
     }).toList();
   }
@@ -78,59 +77,59 @@ class _OffersState extends State<Offers> {
     );
   }
 
-  List<dynamic> Imagess = [];
   @override
   Widget build(BuildContext context) {
     List<String> imageUrls = getImageUrls();
     return Scaffold(
-        body: ListView(
-      children: [
-        const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Text(
-            'My Offers',
-            style: TextStyle(
-                color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),
-          ),
+      appBar: AppBar(
+        title: const Text(
+          'Aarogyam Package',
+          style: TextStyle(color: Colors.white),
         ),
-        const SizedBox(
-          height: 10,
-        ),
-        imageUrls.isNotEmpty
-            ? Column(
+        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: AC.TC,
+      ),
+      body: SingleChildScrollView(
+        child: imageUrls.isEmpty
+            ? const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            : Column(
                 children: [
                   for (int i = 0; i < imageUrls.length; i++)
                     Padding(
-                      padding: const EdgeInsets.only(top: 10.0, bottom: 15.0),
+                      padding: const EdgeInsets.all(10.0),
                       child: GestureDetector(
                         onTap: () {
                           ShowDialogBox(imageUrls[i]);
                         },
                         child: Container(
-                          height: 180,
+                          height: 400,
                           width: MediaQuery.of(context).size.width,
                           decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.3),
-                                  spreadRadius: 2,
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                              borderRadius: BorderRadius.circular(15.0),
-                              image: DecorationImage(
-                                  image: NetworkImage(imageUrls[i]),
-                                  fit: BoxFit.cover)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.3),
+                                spreadRadius: 2,
+                                blurRadius: 4,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                            borderRadius: BorderRadius.circular(15.0),
+                            image: DecorationImage(
+                              image: NetworkImage(imageUrls[i]),
+                              fit: BoxFit.fill,
+                            ),
+                          ),
                         ),
                       ),
-                    )
+                    ),
                 ],
-              )
-            : const Center(
-                child: CircularProgressIndicator(),
-              )
-      ],
-    ));
+              ),
+      ),
+    );
   }
 }

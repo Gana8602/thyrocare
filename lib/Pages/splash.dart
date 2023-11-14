@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thyrocare/Pages/Login.dart';
-import 'package:thyrocare/Pages/mainpage.dart';
+import 'package:thyrocare/main_navigation/mainpage.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -26,8 +26,9 @@ class _SplashScreenState extends State<SplashScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => Home(
+              builder: (context) => MainPAge(
                     name: prefs.getString('userName') ?? '',
+                    onNavigation: (value) => 0,
                     // myCurrentIndex: 0,
                   )),
         );
@@ -48,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
           // Image taking 70% of the screen
           Positioned.fill(
             child: Image.asset(
-              'assets/logo.jpg', // Replace with your image asset
+              'assets/logo.png', // Replace with your image asset
               fit: BoxFit.contain,
             ),
           ),

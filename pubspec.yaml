@@ -47,6 +47,14 @@ dependencies:
   http: ^1.1.0
   url_launcher: ^6.2.1
   carousel_slider: ^4.2.1
+  intl: ^0.18.1
+  path_provider: ^2.1.1
+  permission_handler: ^11.0.1
+  flutter_local_notifications: ^16.1.0
+  flutter_downloader: ^1.10.4
+  flutter_file_downloader: ^1.1.4
+  android_intent: ^2.0.2
+  photo_view: ^0.14.0
 
 dev_dependencies:
   flutter_test:
@@ -72,12 +80,13 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-     - assets/logo.jpg
+     - assets/logo.png
      - assets/profile.png
      - assets/ban1.png
      - assets/ban2.jpg
      - assets/ban3.png
      - assets/banner.png
+     - assets/wave.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
