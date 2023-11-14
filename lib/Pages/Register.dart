@@ -19,12 +19,16 @@ class _RegisterPageState extends State<RegisterPage> {
   String? _firstName;
   String? _lastName;
   String? _email;
+  bool _isLoading = false;
 
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
 
-  Future<void> createPatient() async {
+  Future<int?> createPatient() async {
+    setState(() {
+      _isLoading = true;
+    });
     final String apiUrl =
         'http://ban58.thyroreport.com/api/Patient/CreatePatient';
 
@@ -45,21 +49,75 @@ class _RegisterPageState extends State<RegisterPage> {
       var response = await http.post(
         Uri.parse(apiUrl),
         headers: {
-          'Content-Type': 'application/json', // Set the Content-Type
+          'Content-Type': 'application/json',
         },
-        body: json.encode(patientData), // Convert the patient data to JSON
+        body: json.encode(patientData),
       );
 
       if (response.statusCode == 201) {
-        // Handle the success response
-
-        print(response.body);
         final jsonResponse = json.decode(response.body);
         final patientID = jsonResponse['patientID'];
         await savePatientIDLocally(patientID);
-
         saveSession();
+        print("Patient created successfully");
+        return patientID;
+      } else if (response.statusCode == 500) {
+        print('json response : ${response.body}');
+      } else {
+        print("Failed to create patient. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error: $e");
+    }
 
+    return null;
+  }
+
+  Future<void> saveSession() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isLoggedIn', true);
+  }
+
+  Future<void> savePatientIDLocally(dynamic patientID) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (patientID is int) {
+      prefs.setInt('patientID', patientID);
+    } else if (patientID is String) {
+      prefs.setString('patientID', patientID);
+    }
+  }
+
+  Future<void> createCashback(int patientID) async {
+    final String apiUrl =
+        'http://ban58.thyroreport.com/api/Cashback/createCashback';
+
+    final DateTime currentDate = DateTime.now();
+    final formattedDate =
+        '${currentDate.year}-${currentDate.month}-${currentDate.day}';
+
+    final Map<String, dynamic> cashbackData = {
+      "cashbackID": 0,
+      "patientID": patientID,
+      "transactionAmt": 0,
+      "cashbackAmt": 200,
+      "isExpired": "Available",
+      "createdDate": formattedDate,
+      "isEnabled": "Y",
+      "createdBy": "Online",
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(cashbackData),
+      );
+
+      if (response.statusCode == 201) {
+        print('Cashback created successfully!');
+        print('Response: ${response.body}');
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -69,27 +127,13 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ),
         );
-        print("Patient created successfully");
-      } else if (response.statusCode == 500) {
-        print('json response : ${response.body}');
       } else {
-        // Handle error response
-        print("Failed to create patient. Status code: ${response.statusCode}");
+        print('Error creating cashback. Status code: ${response.statusCode}');
+        print('Response: ${response.body}');
       }
-    } catch (e) {
-      print("Error: $e");
-      // Handle other exceptions
+    } catch (error) {
+      print('Error creating cashback: $error');
     }
-  }
-
-  Future<void> saveSession() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isLoggedIn', true);
-  }
-
-  Future<void> savePatientIDLocally(int patientID) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('patientID', patientID);
   }
 
   @override
@@ -109,7 +153,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     width: 200,
                     decoration: const BoxDecoration(
                         image: DecorationImage(
-                            image: AssetImage('assets/logo.jpg'),
+                            image: AssetImage('assets/logo.png'),
                             fit: BoxFit.cover)),
                   ),
                 ),
@@ -284,28 +328,50 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                 ),
-                Padding(
-                  padding:
-                      const EdgeInsets.only(left: 15.0, right: 15, top: 20),
-                  child: GestureDetector(
-                    onTap: () {
-                      createPatient();
-                    },
-                    child: Container(
-                      height: 50,
-                      width: MediaQuery.of(context).size.width,
-                      decoration: const BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.all(Radius.circular(15)),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Next',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                Stack(
+                  children: [
+                    Visibility(
+                      visible: !_isLoading,
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: GestureDetector(
+                          onTap: () async {
+                            int? patientID = await createPatient();
+                            if (patientID != null) {
+                              createCashback(patientID);
+                            }
+                          },
+                          child: Container(
+                            height: 50,
+                            width: MediaQuery.of(context).size.width,
+                            decoration: const BoxDecoration(
+                              color: Colors.redAccent,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(15)),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'Next',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    Visibility(
+                      visible: _isLoading,
+                      child: Container(
+                        height: 50,
+                        width: MediaQuery.of(context).size.width,
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

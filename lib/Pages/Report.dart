@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:thyrocare/main.dart';
 import 'package:thyrocare/utils/colors.dart';
-import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 import 'package:android_intent/android_intent.dart';
 
 class Report extends StatefulWidget {
@@ -152,9 +151,8 @@ class _ReportState extends State<Report> {
             ),
           ),
           userInformation.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Center(child: CircularProgressIndicator()),
+              ? const Center(
+                  child: Text('No Data Available'),
                 )
               : Container(
                   child: ListView.builder(
@@ -185,7 +183,7 @@ class _ReportState extends State<Report> {
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Container(
-                          height: 70,
+                          height: 80,
                           decoration: const BoxDecoration(
                             gradient: AC.grBG,
                             boxShadow: [
@@ -205,7 +203,8 @@ class _ReportState extends State<Report> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
@@ -230,7 +229,7 @@ class _ReportState extends State<Report> {
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 3),
                                     Row(
                                       children: [
                                         Text(

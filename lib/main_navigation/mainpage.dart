@@ -6,9 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thyrocare/Pages/Aarogyam.dart';
-
+import 'package:permission_handler/permission_handler.dart';
 import 'package:thyrocare/Pages/Contact.dart';
 import 'package:thyrocare/Pages/Login.dart';
 
@@ -44,6 +45,7 @@ class MainPAge extends StatefulWidget {
 
 class _MainPAgeState extends State<MainPAge> {
   int _myCurrentIndex = 0;
+  String popup = '';
   final navigationKey = GlobalKey<CurvedNavigationBarState>();
   late List<Widget> pages;
   @override
@@ -56,6 +58,88 @@ class _MainPAgeState extends State<MainPAge> {
       const Offers(),
       const ContactUs(),
     ];
+
+    _PopUpImageUrl();
+    _checkAndRequestPermissions();
+    // _checkIfOfferShown();
+  }
+
+  Future<void> _checkAndRequestPermissions() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasRequestedPermission =
+        prefs.getBool('hasRequestedPermission') ?? false;
+
+    if (!hasRequestedPermission) {
+      await _requestPermissions();
+      await prefs.setBool('hasRequestedPermission', true);
+    }
+  }
+
+  Future<void> _requestPermissions() async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      await Permission.storage.request();
+    }
+    // You can add additional logic based on the permission status if needed.
+  }
+
+  Future<void> _PopUpImageUrl() async {
+    try {
+      // Fetch the JSON response from your API
+      final response = await http.get(
+          Uri.parse('http://ban58.thyroreport.com/api/AdPopup/GetPopupImage'));
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+
+        if (data.isNotEmpty) {
+          final firstItem = data[0];
+          final filename = firstItem['adPopupFilename'];
+
+          // Construct the complete URL for the image using the retrieved filename
+          popup =
+              'http://ban58files.thyroreport.com/UploadedFiles/OfferPackage/$filename';
+          print('Image URL: $popup');
+          setState(() {
+            _showOfferPopup();
+          });
+        }
+      } else {
+        throw Exception('Failed to load image');
+      }
+    } catch (e) {
+      print('Error fetching image: $e');
+    }
+  }
+
+  // Future<void> _checkIfOfferShown() async {
+
+  //   if (offerShown != null && offerShown) {
+  //     // The offer was previously shown in the current app session, do nothing
+  //   } else {
+  //     // Show the offer popup
+
+  //     // Set the flag to true indicating the offer has been shown in the current app session
+
+  //   }
+  // }
+
+  Future<void> _showOfferPopup() async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+            backgroundColor: Color.fromARGB(0, 216, 216, 216).withOpacity(0.10),
+            content: popup.isNotEmpty
+                ? Container(
+                    height: 300,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: NetworkImage(popup), fit: BoxFit.fill)))
+                : const CircularProgressIndicator());
+      },
+    );
   }
 
   @override
@@ -73,7 +157,7 @@ class _MainPAgeState extends State<MainPAge> {
           preferredSize: const Size.fromHeight(60.0),
           child: AppBar(
             title: const Text(
-              'Thyro Test Report',
+              'Thyrocare Report',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -105,27 +189,27 @@ class _MainPAgeState extends State<MainPAge> {
           items: const <Widget>[
             Icon(
               Icons.home,
-              size: 30,
+              size: 20,
               color: Color(0xFF121e19),
             ),
             Icon(
-              Icons.book_sharp,
-              size: 30,
+              Icons.assignment_outlined,
+              size: 20,
               color: Color(0xFF121e19),
             ),
             Icon(
-              Icons.wallet,
-              size: 30,
+              Icons.account_balance_wallet,
+              size: 20,
               color: Color(0xFF121e19),
             ),
             Icon(
-              CupertinoIcons.rays,
-              size: 30,
+              Icons.local_offer_outlined,
+              size: 20,
               color: Color(0xFF121e19),
             ),
             Icon(
-              Icons.contact_phone_outlined,
-              size: 30,
+              Icons.phone,
+              size: 20,
               color: Color(0xFF121e19),
             ),
           ],
@@ -182,7 +266,7 @@ class MyDrawer extends StatelessWidget {
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(
-              color: Colors.blueAccent,
+              color: Color(0xFF0033cc),
             ),
             child: Column(
               children: [
@@ -292,13 +376,12 @@ class homePage extends StatefulWidget {
 class _homePageState extends State<homePage> {
   int netValue = 0;
   String? patientID;
-  String popup = '';
+
   List<Map<String, dynamic>> testData = [];
   @override
   void initState() {
     super.initState();
-    _PopUpImageUrl();
-    _checkIfOfferShown();
+
     GetIamges();
     GetIamges2();
     retrieveUserData();
@@ -320,71 +403,13 @@ class _homePageState extends State<homePage> {
     });
   }
 
-  Future<void> _PopUpImageUrl() async {
-    try {
-      // Fetch the JSON response from your API
-      final response = await http.get(
-          Uri.parse('http://ban58.thyroreport.com/api/AdPopup/GetPopupImage'));
-
-      if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.body);
-
-        if (data.isNotEmpty) {
-          final firstItem = data[0];
-          final filename = firstItem['adPopupFilename'];
-
-          // Construct the complete URL for the image using the retrieved filename
-          popup =
-              'http://ban58files.thyroreport.com/UploadedFiles/OfferPackage/$filename';
-          setState(() {});
-        }
-      } else {
-        throw Exception('Failed to load image');
-      }
-    } catch (e) {
-      print('Error fetching image: $e');
-    }
-  }
-
-  Future<void> _checkIfOfferShown() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool? offerShown = prefs.getBool('offerShown');
-
-    if (offerShown != null && offerShown) {
-      // The offer was previously shown in the current app session, do nothing
-    } else {
-      // Show the offer popup
-      _showOfferPopup();
-
-      // Set the flag to true indicating the offer has been shown in the current app session
-      await prefs.setBool('offerShown', true);
-    }
-  }
-
-  Future<void> _showOfferPopup() async {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        Future.delayed(const Duration(seconds: 5), () {
-          Navigator.of(context).pop(true); // Close the dialog after 5 seconds
-        });
-        return AlertDialog(
-            backgroundColor: Colors.transparent,
-            content: popup.isNotEmpty
-                ? Container(
-                    height: 300,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: NetworkImage(popup), fit: BoxFit.fill)))
-                : const CircularProgressIndicator());
-      },
-    );
-  }
-
   Future<String?> fetchPatientID() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? patientID = prefs.getString('patientID');
+    dynamic storedPatientID = prefs.get('patientID');
+
+    // Convert the stored value to a string
+    String? patientID = storedPatientID?.toString();
+
     print('patientID: $patientID');
     return patientID;
   }
@@ -395,12 +420,20 @@ class _homePageState extends State<homePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.transparent,
+          title: Text(
+            'Zoom to View',
+            style: TextStyle(color: Colors.white),
+          ),
           content: Container(
-              height: 300,
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: NetworkImage(image), fit: BoxFit.fill))),
+            height: 250,
+            width: MediaQuery.of(context).size.width,
+            child: PhotoView(
+              imageProvider: NetworkImage(image),
+              minScale: PhotoViewComputedScale.contained,
+              maxScale: PhotoViewComputedScale.covered * 2,
+              initialScale: PhotoViewComputedScale.contained,
+            ),
+          ),
         );
       },
     );
@@ -412,12 +445,20 @@ class _homePageState extends State<homePage> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.transparent,
+          title: Text(
+            'Zoom to View',
+            style: TextStyle(color: Colors.white),
+          ),
           content: Container(
-              height: 450,
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: NetworkImage(image), fit: BoxFit.fill))),
+            height: 250,
+            width: MediaQuery.of(context).size.width,
+            child: PhotoView(
+              imageProvider: NetworkImage(image),
+              minScale: PhotoViewComputedScale.contained,
+              maxScale: PhotoViewComputedScale.covered * 2,
+              initialScale: PhotoViewComputedScale.contained,
+            ),
+          ),
         );
       },
     );
@@ -454,7 +495,23 @@ class _homePageState extends State<homePage> {
     });
   }
 
-  Future<List<Map<String, dynamic>>> fetchData() async {
+  Future<void> retrieveCashbackData() async {
+    try {
+      String? patientID = await fetchPatientID();
+      print('Patient ID in retrieveCashbackData: $patientID');
+
+      if (patientID != null) {
+        List<Map<String, dynamic>> data = await fetchData(patientID);
+        setState(() {
+          availableResponses = data;
+        });
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchData(String patientID) async {
     final response = await http.get(Uri.parse(
         'http://ban58.thyroreport.com/api/Cashback/GetCashbackByPatientID?PatientID=$patientID'));
 
@@ -470,19 +527,6 @@ class _homePageState extends State<homePage> {
       print('Request failed with status: ${response.statusCode}');
       print('Response: ${response.body}');
       throw Exception('Failed to load cashback data');
-    }
-  }
-
-  Future<void> retrieveCashbackData() async {
-    try {
-      if (patientID != null) {
-        List<Map<String, dynamic>> data = await fetchData();
-        setState(() {
-          availableResponses = data;
-        });
-      }
-    } catch (e) {
-      print('Error: $e');
     }
   }
 
@@ -595,9 +639,9 @@ class _homePageState extends State<homePage> {
   List<dynamic> Imagess22 = [];
   final List<IconData> icons1 = [
     // Icons.home,
-    Icons.book_sharp,
-    Icons.wallet,
-    CupertinoIcons.rays,
+    Icons.assignment_outlined,
+    Icons.account_balance_wallet,
+    Icons.local_offer_outlined,
     Bootstrap.calendar2_month,
     Icons.water_drop_sharp,
     Icons.card_giftcard_sharp,
@@ -653,7 +697,7 @@ class _homePageState extends State<homePage> {
                     availableResponses.isNotEmpty
                         ? Padding(
                             padding:
-                                const EdgeInsets.only(left: 15.0, bottom: 10.0),
+                                const EdgeInsets.only(left: 60.0, bottom: 20.0),
                             child: Text(
                               '₹ ${availableResponses.first['cashbackAmt']}', // Adjust this line
                               style: const TextStyle(
@@ -663,9 +707,14 @@ class _homePageState extends State<homePage> {
                             ),
                           )
                         : const Padding(
-                            padding: EdgeInsets.only(left: 15.0),
-                            child: CircularProgressIndicator(),
-                          ),
+                            padding: EdgeInsets.only(left: 50.0),
+                            child: Text(
+                              "0",
+                              style: const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white60),
+                            )),
                     const Spacer(),
                     medcoinData.isNotEmpty
                         ? Padding(
@@ -680,8 +729,14 @@ class _homePageState extends State<homePage> {
                             ),
                           )
                         : const Padding(
-                            padding: EdgeInsets.only(left: 15.0),
-                            child: CircularProgressIndicator(),
+                            padding: EdgeInsets.only(right: 15.0),
+                            child: Text(
+                              "0",
+                              style: const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white60),
+                            ),
                           ),
                   ],
                 ),
@@ -844,70 +899,77 @@ class _homePageState extends State<homePage> {
           const SizedBox(
             height: 15,
           ),
-          Container(
-            height: 60,
-            width: MediaQuery.of(context).size.width,
-            decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(10))),
-            child: const Padding(
-              padding: EdgeInsets.all(15.0),
-              child: Text(
-                'Test Rate',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                  gradient: AC.TestBg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Text(
+                      'Test Rate',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                      height: 80,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: testData.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                                left: 8.0, right: 8.0, bottom: 8.0),
+                            child: Container(
+                              height: 50,
+                              width: 160,
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    spreadRadius: 2,
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(15)),
+                                color: Colors.white,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text(
+                                    testData[index]['testName'],
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    testData[index]['cost'].toString(),
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      )),
+                ],
               ),
             ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Container(
-            child: Container(
-                height: 80,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.horizontal,
-                  itemCount: testData.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                          left: 8.0, right: 8.0, bottom: 8.0),
-                      child: Container(
-                        height: 50,
-                        width: 180,
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 4,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(15)),
-                          color: Colors.white,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Text(
-                              testData[index]['testName'],
-                              style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              testData[index]['cost'].toString(),
-                              style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                )),
           ),
           const SizedBox(
             height: 20,
@@ -999,47 +1061,50 @@ class GridItemWidget extends StatelessWidget {
               break;
           }
         },
-        child: Container(
-          height: 60,
-          width: 180,
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 2,
-                blurRadius: 4,
-                offset: const Offset(0, 4),
-              ),
-            ],
-            borderRadius: const BorderRadius.all(Radius.circular(15)),
-            color: Colors.white,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  iconData,
-                  size: 30,
-                  color: colours[index],
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            height: 60,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 4,
+                  offset: const Offset(0, 4),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Container(
-                width: 80,
-                child: Text(
-                  softWrap: true,
-                  Title[index],
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
+              ],
+              borderRadius: const BorderRadius.all(Radius.circular(15)),
+              color: Colors.white,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    iconData,
+                    size: 25,
+                    color: colours[index],
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 10),
+                Container(
+                  width: 80,
+                  child: Text(
+                    softWrap: true,
+                    Title[index],
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

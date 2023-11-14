@@ -10,4 +10,12 @@ class AC {
         Color.fromARGB(255, 62, 115, 228),
         Color.fromARGB(255, 2, 52, 161)
       ]);
+
+  static const TestBg = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color.fromARGB(255, 62, 228, 84),
+        Color.fromARGB(255, 2, 150, 161)
+      ]);
 }

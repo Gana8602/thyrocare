@@ -161,7 +161,7 @@ class _CashbackState extends State<Cashback> {
                             ),
                           )
                         : const Center(
-                            child: CircularProgressIndicator(),
+                            child: Text('No Data Available'),
                           )),
               ],
             ),
@@ -182,7 +182,7 @@ class _CashbackState extends State<Cashback> {
                 ),
                 Container(
                     height: 200, // Adjust the height as needed
-                    width: 400,
+                    width: MediaQuery.of(context).size.width,
                     child: cashbackData2.isNotEmpty
                         ? Container(
                             decoration: BoxDecoration(
@@ -191,11 +191,13 @@ class _CashbackState extends State<Cashback> {
                             ),
                             child: SingleChildScrollView(
                               child: DataTable(
+                                columnSpacing: 16.0,
                                 columns: const <DataColumn>[
                                   DataColumn(label: Text('Date')),
                                   DataColumn(label: Text('Status')),
                                   DataColumn(label: Text('Amount')),
                                   DataColumn(label: Text('Medcoin')),
+                                  DataColumn(label: Text('Store Name'))
                                 ],
                                 rows: cashbackData2.map((item) {
                                   DateTime? date2 = DateTime.tryParse(
@@ -211,13 +213,14 @@ class _CashbackState extends State<Cashback> {
                                             '')),
                                     DataCell(Text(
                                         item['medcoin']?.toString() ?? '')),
+                                    DataCell(Text(item['medLabStore'] ?? ''))
                                   ]);
                                 }).toList(),
                               ),
                             ),
                           )
                         : const Center(
-                            child: CircularProgressIndicator(),
+                            child: Text('No Data Available'),
                           )),
               ],
             ),

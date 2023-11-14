@@ -44,38 +44,38 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCeE_-ebpWVSVRcJkMFd8JF5qhGfwDUfxg',
-    appId: '1:910092138537:web:ad7eea843a4c8f64294438',
-    messagingSenderId: '910092138537',
-    projectId: 'thyrocare-8d7e6',
-    authDomain: 'thyrocare-8d7e6.firebaseapp.com',
-    storageBucket: 'thyrocare-8d7e6.appspot.com',
-    measurementId: 'G-YZRVKHMEF4',
+    apiKey: 'AIzaSyDW1tOK0OfpbChbYBgq5DafSWLe7aZjeyQ',
+    appId: '1:163965345453:web:5917c93a64542f0feaf024',
+    messagingSenderId: '163965345453',
+    projectId: 'thyrocare-ca7e8',
+    authDomain: 'thyrocare-ca7e8.firebaseapp.com',
+    storageBucket: 'thyrocare-ca7e8.appspot.com',
+    measurementId: 'G-96JJ4WM0BX',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDhGzIIv5BmXEgSlSZMEiZ-Ha_GIntv6-E',
-    appId: '1:910092138537:android:2208866d3426856a294438',
-    messagingSenderId: '910092138537',
-    projectId: 'thyrocare-8d7e6',
-    storageBucket: 'thyrocare-8d7e6.appspot.com',
+    apiKey: 'AIzaSyClWWXmUP7TSvyktbyQ0_dnDYwGt_wTGm8',
+    appId: '1:163965345453:android:2d93156ff0544c5feaf024',
+    messagingSenderId: '163965345453',
+    projectId: 'thyrocare-ca7e8',
+    storageBucket: 'thyrocare-ca7e8.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAUisGcI0Rxwfz9smy8dPhyda_NL9WtRdY',
-    appId: '1:910092138537:ios:51ffd2d2b990254a294438',
-    messagingSenderId: '910092138537',
-    projectId: 'thyrocare-8d7e6',
-    storageBucket: 'thyrocare-8d7e6.appspot.com',
-    iosBundleId: 'com.example.thyrocare',
+    apiKey: 'AIzaSyCn0OX-3_SZ_-C340XSwjodbtdj6HTZHQc',
+    appId: '1:163965345453:ios:fa8b0905c6961e7deaf024',
+    messagingSenderId: '163965345453',
+    projectId: 'thyrocare-ca7e8',
+    storageBucket: 'thyrocare-ca7e8.appspot.com',
+    iosBundleId: 'com.thyrocare.groot',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAUisGcI0Rxwfz9smy8dPhyda_NL9WtRdY',
-    appId: '1:910092138537:ios:d6d559625f35d3f1294438',
-    messagingSenderId: '910092138537',
-    projectId: 'thyrocare-8d7e6',
-    storageBucket: 'thyrocare-8d7e6.appspot.com',
-    iosBundleId: 'com.example.thyrocare.RunnerTests',
+    apiKey: 'AIzaSyCn0OX-3_SZ_-C340XSwjodbtdj6HTZHQc',
+    appId: '1:163965345453:ios:97c5aafaf949d048eaf024',
+    messagingSenderId: '163965345453',
+    projectId: 'thyrocare-ca7e8',
+    storageBucket: 'thyrocare-ca7e8.appspot.com',
+    iosBundleId: 'com.thyrocare.groot.RunnerTests',
   );
 }

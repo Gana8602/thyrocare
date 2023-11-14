@@ -49,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
           // Image taking 70% of the screen
           Positioned.fill(
             child: Image.asset(
-              'assets/logo.jpg', // Replace with your image asset
+              'assets/logo.png', // Replace with your image asset
               fit: BoxFit.contain,
             ),
           ),

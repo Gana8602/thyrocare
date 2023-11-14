@@ -61,7 +61,7 @@ class _MedicalStoresPageState extends State<MedicalStoresPage> {
                   ],
                   color: Colors.white,
                   borderRadius: const BorderRadius.all(Radius.circular(15))),
-              height: 280,
+              height: 250,
               width: MediaQuery.of(context).size.width,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +73,7 @@ class _MedicalStoresPageState extends State<MedicalStoresPage> {
                       Padding(
                         padding: const EdgeInsets.all(4.0),
                         child: Text(
-                          store['medStoreName'],
+                          "Store: ${store['medStoreName']}",
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -145,27 +145,6 @@ class _MedicalStoresPageState extends State<MedicalStoresPage> {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class LargerImageView extends StatelessWidget {
-  final String imageUrl;
-
-  LargerImageView({required this.imageUrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Larger Image'),
-      ),
-      body: Center(
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.contain,
-        ),
       ),
     );
   }

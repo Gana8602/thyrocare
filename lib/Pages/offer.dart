@@ -5,6 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../utils/colors.dart';
 
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
+
 class Offers extends StatefulWidget {
   const Offers({super.key});
 
@@ -55,13 +58,21 @@ class _OffersState extends State<Offers> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          title: Text(
+            'Zoom to View',
+            style: TextStyle(color: Colors.white),
+          ),
           backgroundColor: Colors.transparent,
           content: Container(
-              height: 300,
-              width: 400,
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: NetworkImage(image), fit: BoxFit.cover))),
+            height: 250,
+            width: MediaQuery.of(context).size.width,
+            child: PhotoView(
+              imageProvider: NetworkImage(image),
+              minScale: PhotoViewComputedScale.contained,
+              maxScale: PhotoViewComputedScale.covered * 2,
+              initialScale: PhotoViewComputedScale.contained,
+            ),
+          ),
         );
       },
     );
@@ -90,9 +101,7 @@ class _OffersState extends State<Offers> {
                 children: [
                   for (int i = 0; i < imageUrls.length; i++)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        top: 10.0,
-                      ),
+                      padding: const EdgeInsets.only(top: 10.0, bottom: 15.0),
                       child: GestureDetector(
                         onTap: () {
                           ShowDialogBox(imageUrls[i]);

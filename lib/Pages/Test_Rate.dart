@@ -51,45 +51,47 @@ class _TestRateState extends State<TestRate> {
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Color(0xFF0033cc),
       ),
-      body: ListView(
-        children: testData.map((item) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              height: 60,
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 4,
-                    offset: const Offset(0, 4),
+      body: testData.isEmpty
+          ? Center(child: Text(" No Data Available"))
+          : ListView(
+              children: testData.map((item) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 4,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 25.0),
+                          child: Text(item['testName']),
+                        ),
+                        const Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(item['cost'].toString()),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-                color: Colors.white,
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 25.0),
-                    child: Text(item['testName']),
-                  ),
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(item['cost'].toString()),
-                  ),
-                ],
-              ),
+                );
+              }).toList(),
             ),
-          );
-        }).toList(),
-      ),
     );
   }
 }

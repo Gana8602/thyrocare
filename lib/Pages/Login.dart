@@ -56,6 +56,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       verificationFailed: (FirebaseAuthException e) {
         // Handle verification failure
         print("Verification Failed: ${e.message}");
+        _isLoading = false;
       },
       codeSent: (String verificationId, int? resendToken) {
         // Navigate to OTP verification page
@@ -63,9 +64,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
           context,
           MaterialPageRoute(
             builder: (context) => OtpPage(
-                phoneNumber: phoneNumber,
-                verificationId: verificationId,
-                codeLenth: 4),
+              phoneNumber: phoneNumber,
+              verificationId: verificationId,
+              codeLength: 4,
+            ),
           ),
         );
       },
@@ -92,7 +94,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     width: 200,
                     decoration: const BoxDecoration(
                         image: DecorationImage(
-                            image: AssetImage('assets/logo.jpg'),
+                            image: AssetImage('assets/logo.png'),
                             fit: BoxFit.cover)),
                   ),
                 ),

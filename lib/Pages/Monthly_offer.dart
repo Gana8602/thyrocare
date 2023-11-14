@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MonthlyOffer extends StatefulWidget {
@@ -49,6 +50,31 @@ class _MonthlyOfferState extends State<MonthlyOffer> {
     }).toList();
   }
 
+  Future<void> ShowDialogBox(String image) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Zoom to View',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.transparent,
+          content: Container(
+            height: 250,
+            width: MediaQuery.of(context).size.width,
+            child: PhotoView(
+              imageProvider: NetworkImage(image),
+              minScale: PhotoViewComputedScale.contained,
+              maxScale: PhotoViewComputedScale.covered * 2,
+              initialScale: PhotoViewComputedScale.contained,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     List<String> imageUrls = getImageUrls();
@@ -59,7 +85,7 @@ class _MonthlyOfferState extends State<MonthlyOffer> {
           style: TextStyle(color: Colors.white),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Color(0xFF0033cc),
       ),
       body: SingleChildScrollView(
         child: imageUrls.isEmpty
@@ -73,22 +99,27 @@ class _MonthlyOfferState extends State<MonthlyOffer> {
                   for (int i = 0; i < imageUrls.length; i++)
                     Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: Container(
-                        height: 400,
-                        width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.3),
-                              spreadRadius: 2,
-                              blurRadius: 4,
-                              offset: const Offset(0, 4),
+                      child: GestureDetector(
+                        onTap: () {
+                          ShowDialogBox(imageUrls[i]);
+                        },
+                        child: Container(
+                          height: 400,
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.3),
+                                spreadRadius: 2,
+                                blurRadius: 4,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                            borderRadius: BorderRadius.circular(15.0),
+                            image: DecorationImage(
+                              image: NetworkImage(imageUrls[i]),
+                              fit: BoxFit.fill,
                             ),
-                          ],
-                          borderRadius: BorderRadius.circular(15.0),
-                          image: DecorationImage(
-                            image: NetworkImage(imageUrls[i]),
-                            fit: BoxFit.fill,
                           ),
                         ),
                       ),
